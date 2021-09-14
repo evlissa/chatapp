@@ -1,10 +1,11 @@
 # Чат-приложение 
 Это приложение использует:
   1. docker-compose
-  1. django
-  1. django-channels 2
-  1. redis
-  1. pip
+  2. python
+  3. django
+  4. django-channels 2
+  5. redis
+  6. pip
  
 ## Проверка работы приложения
 
