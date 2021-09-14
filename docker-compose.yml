@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  redis:
+    image: "redis:5"
+    ports:
+      - "6379:6379"
+  web:
+    build: ./mysitewithchat
+    ports:
+      - "8000:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/chat/mysitewithchat/mysitewithchat
+    links:
+      - redis
+  
+

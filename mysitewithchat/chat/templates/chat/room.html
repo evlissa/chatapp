@@ -1,0 +1,104 @@
+<!-- chat/templates/chat/room.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<body>
+    <style type="text/css">
+        .main{
+            text-align: center;
+            font-family: "Segoe UI";
+            font-weight: 400;
+            }
+    </style>
+    
+    <div class="card mt-3">
+        <div class="card-header">
+            <div class="d-flex flex-row justify-content-between">
+                <h3 class="">Public Chat</h3>
+            </div>
+        </div>
+        <div class="card-body p-1">
+            <div class="d-flex flex-column" id="chat_log_container">
+                <div class="d-flex flex-row justify-content-center" id="chatroom_loading_spinner_container">
+                    <div class="spinner-border text-primary"  id="chatroom_loading_spinner" role="status"  style="display: none; ">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            <textarea readonly style="resize: none;" class="d-flex chat-log" id="chat-log" cols="100" rows="20"></textarea>
+            <div class="d-flex chat-message-input-container">
+                <textarea class="flex-grow-1 chat-message-input" id="chat-message-input"></textarea>
+                <button class="btn btn-primary chat-message-submit" id="chat-message-submit">Send</button>
+                <a class="btn btn-outline-primary m-2" href="{% url 'logout' %}">Log out</a>
+                </div>
+        </div>
+    </div>  
+    {{ room_name|json_script:"room-name" }}
+    <script>
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+        var chatSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/chat/'
+            + roomName
+            + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            var data = JSON.parse(e.data);
+            displayChatroomLoadingSpinner(data.display_progress_bar)
+            if (data['command'] === 'messages'){
+                for (let i=0; i<data['messages'].length; i++){
+                    createMessage(data['messages'][i]);
+                }
+            }
+            else if (data['command'] === 'new_message'){
+                createMessage(data['message']);
+            }
+        };
+
+        chatSocket.onopen = function(e){
+            fetchMessages();
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            var messageInputDom = document.querySelector('#chat-message-input');
+            var message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'command':'new_message',
+            }));
+            messageInputDom.value = '';
+        };
+
+        function displayChatroomLoadingSpinner(isDisplayed){
+            var spinner = document.getElementById("chatroom_loading_spinner")
+            if(isDisplayed){
+                spinner.style.display = "block"
+            }
+            else{
+                spinner.style.display = "none"
+            }
+        }
+        function fetchMessages(){
+            chatSocket.send(JSON.stringify({'command':'fetch_messages'}));
+        }
+        function createMessage(data){
+            document.querySelector('#chat-log').value += (data.visualdate+" "+ data.author+": "+data.content + '\n');
+        }
+    </script>
+</body>
+{% endblock content %}

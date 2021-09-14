@@ -1,0 +1,68 @@
+<!-- chat/templates/chat/login.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<body>
+    <style type="text/css">
+        .card-signin{
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+            margin: auto;
+            }
+        .form-signin input[type="email"] {
+            margin-bottom: 10px;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 0;
+            }
+        .form-signin input[type="password"] {
+            margin-bottom: -1px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            }
+    </style>
+
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="card card-signin">
+                <div class="card-body">
+                    <form class="form-signin" method="post">{% csrf_token %}
+
+                        <p style="color: red" type="text"> You need to be logged in to be able to enter the room!! </p>
+                        
+                        <input type="username" class="form-control" id="inputUsername" name="username" placeholder="Username" required autofocus><br>
+
+                        <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required><br>
+
+                    {% for field in login_form %}
+                    <p>
+                    {% for error in field.errors %}
+                    <p style="color: red">{{ error }}</p>
+                    {% endfor %}
+                    </p>
+                    {% endfor %}
+                    {% if login_form.non_field_errors %}
+                    <div style="color: red">
+                    <p>{{login_form.non_field_errors}}</p>
+                    </div>
+
+                    {% endif %}
+                    <div class = "text-center">
+                        <button class="btn btn-lg btn-primary btn-block" type="submit">Log in</button>
+                    </div>
+                    
+                    </form>
+                <div class="d-flex flex-column my-4">
+                    <a class="m-auto justify-content-center" href="{% url 'register' %}">Register</a>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+
+{% endblock content %}
